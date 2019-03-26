@@ -253,6 +253,8 @@ output.qc.file = NULL) {
             widthR <- quantile(width(tumor[tumor$ideal]), prob=0.1)
             tumor$ideal[width(tumor) < widthR] <- FALSE
         }
+        tumor <- .downsampleIntervals(tumor)
+
         rough <- loess(tumor$average.coverage[tumor$ideal] ~ tumor$gc_bias[tumor$ideal], 
             span = 0.03)
         i <- seq(0, 1, by = 0.001)
@@ -276,4 +278,16 @@ output.qc.file = NULL) {
         tumor$valid <- NULL
     }
     list(coverage = tumor, medDiploid=medDiploid)
+}
+
+.downsampleIntervals <- function(x, min.intervals = 5, max.intervals = 1000, digits = 3) {
+    ids <- split(seq_along(x), round(x$gc_bias, digits = digits))
+    # remove non-ideal intervals
+    ids <- sapply(ids, function(i) i[x[i]$ideal])
+    ids <- ids[sapply(ids, length) >= min.intervals]
+    ids <- sapply(ids, function(i) 
+                  if (length(i) < max.intervals) return(i) else return(sort(sample(i, max.intervals))))
+    x$ideal <- FALSE
+    x$ideal[unlist(ids)] <- TRUE
+    x
 }
