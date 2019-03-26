@@ -254,7 +254,7 @@ output.qc.file = NULL) {
             tumor$ideal[width(tumor) < widthR] <- FALSE
         }
         tumor <- .downsampleIntervals(tumor)
-
+        if (!any(tumor$ideal)) .stopUserError("No intervals pass filters")
         rough <- loess(tumor$average.coverage[tumor$ideal] ~ tumor$gc_bias[tumor$ideal], 
             span = 0.03)
         i <- seq(0, 1, by = 0.001)

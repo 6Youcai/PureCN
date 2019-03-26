@@ -17,7 +17,8 @@ test_that("Example data matches after normalization", {
         plot.bias = TRUE)
     x <- readCoverageFile(output.file)
     expect_equal(x$average.coverage, coverage$average.coverage)
-    correctCoverageBias(head(x, 200), interval.file2)
+    expect_error(correctCoverageBias(head(x, 200), interval.file2),
+                 "No intervals pass filters")
     gc.data <- read.delim(interval.file2, as.is = TRUE)
     gc.data$Gene <- NULL
     tmpFile <- tempfile()
